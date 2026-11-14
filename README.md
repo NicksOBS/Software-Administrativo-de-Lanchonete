@@ -1,0 +1,1 @@
+Esse programa foi desenvolvido com o intuito de auxiliar na gerencia das vendas de uma lanchonete, salvando as entradas (vendas) separadamente por tipo (cartão, dinheiro, PIX) em uma planilha.
