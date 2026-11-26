@@ -20,3 +20,15 @@ class LoginJaExisteError(ErroDeNegocio):
 
 class CredenciaisInvalidasError(ErroDeNegocio):
     """Login ou senha incorretos."""
+
+
+class RegistroDuplicadoError(ErroDeNegocio):
+    """Já existe um registro com esse nome (categoria, produto...)."""
+
+
+class NaoEncontradoError(ErroDeNegocio):
+    """O registro pedido não existe (ou já foi removido)."""
+
+
+class OperacaoNaoPermitidaError(ErroDeNegocio):
+    """A regra de negócio não permite essa operação agora."""

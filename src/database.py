@@ -17,6 +17,7 @@ import sqlite3
 from pathlib import Path
 
 from src.config import ARQUIVO_BANCO
+from src.textos import normalizar
 
 VERSAO_SCHEMA = 1
 
@@ -111,5 +112,8 @@ def conectar(caminho: str | Path | None = None) -> sqlite3.Connection:
     conn = sqlite3.connect(str(caminho))
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    # Permite pesquisar sem diferenciar acentos nem maiúsculas dentro do SQL:
+    #   WHERE sem_acento(nome) LIKE ...
+    conn.create_function("sem_acento", 1, normalizar, deterministic=True)
     inicializar(conn)
     return conn

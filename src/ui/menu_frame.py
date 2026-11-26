@@ -18,9 +18,17 @@ OPCOES = [
 
 
 class MenuFrame(ctk.CTkFrame):
-    def __init__(self, master, usuario: Usuario, ao_sair: Callable[[], None]) -> None:
+    def __init__(
+        self,
+        master,
+        usuario: Usuario,
+        ao_sair: Callable[[], None],
+        ao_abrir_produtos: Callable[[], None],
+    ) -> None:
         super().__init__(master, fg_color="transparent")
         self._usuario = usuario
+        # Opções sem tela ainda mostram o aviso "Em construção".
+        acoes = {"Produtos": ao_abrir_produtos}
 
         topo = ctk.CTkFrame(self, fg_color="transparent")
         topo.pack(fill="x", padx=30, pady=(24, 0))
@@ -44,7 +52,7 @@ class MenuFrame(ctk.CTkFrame):
                 grade, text=texto, font=tema.FONTE_MENU, height=tema.ALTURA_BOTAO_MENU,
                 fg_color=tema.COR_PRIMARIA, hover_color=tema.COR_PRIMARIA_HOVER,
                 text_color="white", corner_radius=14,
-                command=lambda t=texto: self._em_construcao(t),
+                command=acoes.get(texto, lambda t=texto: self._em_construcao(t)),
             ).grid(row=indice // 2, column=indice % 2, sticky="nsew", padx=12, pady=12)
 
     @staticmethod
