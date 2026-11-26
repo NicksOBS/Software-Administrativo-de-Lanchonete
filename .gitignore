@@ -1,5 +1,9 @@
 .venv/
 __pycache__/
+*.pyc
+.pytest_cache/
+
+# Dados gerados em execução (banco e planilhas das vendas)
+data/
 *.db
 *.xlsx
-.pytest_cache/
