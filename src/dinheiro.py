@@ -16,21 +16,26 @@ _INTEIRA = re.compile(r"[0-9]+|[0-9]{1,3}(\.[0-9]{3})+")   # parte antes da vír
 _NUMERO = re.compile(r"[0-9]+(\.[0-9]+)?")
 
 
-def parse_reais(texto: str | None) -> int:
+def parse_reais(texto: str | None, campo: str = "preço") -> int:
     """Converte o texto digitado em centavos.
 
     Aceita "6", "6,5", "6,50", "6.50", "R$ 6,50" e "1.234,56".
     A vírgula é o separador decimal; o ponto só vale como decimal quando tem
     de 1 a 2 dígitos depois dele ("6.5"). "1.234" é lido como mil duzentos e
     trinta e quatro reais.
+
+    `campo` é o nome que aparece nas mensagens de erro ("preço", "valor",
+    "limite"...).
     """
     bruto = (texto or "").upper().replace("R$", "").replace(" ", "")
     if not bruto:
-        raise DadosInvalidosError("Informe o preço.")
+        raise DadosInvalidosError(f"Informe o {campo}.")
     if bruto.startswith("-"):
-        raise DadosInvalidosError("O preço não pode ser negativo.")
+        raise DadosInvalidosError(f"O {campo} não pode ser negativo.")
 
-    invalido = DadosInvalidosError("Preço inválido. Use um formato como 6,50.")
+    invalido = DadosInvalidosError(
+        f"{campo[:1].upper()}{campo[1:]} inválido. Use um formato como 6,50."
+    )
     if "," in bruto:
         inteira, _, decimal = bruto.partition(",")
         if not (_INTEIRA.fullmatch(inteira) and _DIGITOS.fullmatch(decimal)):
@@ -44,7 +49,7 @@ def parse_reais(texto: str | None) -> int:
 
     valor = Decimal(bruto)
     if valor.as_tuple().exponent < -2:
-        raise DadosInvalidosError("Use no máximo 2 casas decimais no preço.")
+        raise DadosInvalidosError(f"Use no máximo 2 casas decimais no {campo}.")
     return int(valor * 100)
 
 

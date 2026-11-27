@@ -16,6 +16,11 @@ def normalizar(texto: str | None) -> str | None:
     return sem_acento.casefold()
 
 
+def escapar_like(termo: str) -> str:
+    """Faz % e _ valerem como texto comum num LIKE ... ESCAPE '\\'."""
+    return termo.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 def limpar_espacos(texto: str | None) -> str:
     """Remove espaços nas pontas e reduz espaços repetidos no meio."""
     return " ".join((texto or "").split())

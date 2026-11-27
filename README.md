@@ -49,12 +49,18 @@ repositórios conhecem o SQL.
 | RF01 login e cadastro de usuários | feito |
 | RNF08 senhas com hash (PBKDF2) | feito |
 | Banco SQLite com todas as tabelas | feito |
-| Tela principal com 4 opções | feita (só Produtos tem tela por enquanto) |
+| Tela principal com 4 opções | feita (Produtos e Clientes têm tela; faltam Vendas e Expediente) |
 | RF04 categorias (criar, renomear, remover) | feito |
 | RF05 produtos (cadastrar, editar, remover) | feito |
 | RF06 pesquisa de produtos (nome ou categoria, sem acento) | feito |
 | RF02, RF03 registro de vendas | próxima etapa |
-| RF07 a RF11 clientes e fiado | próxima etapa |
+| RF07 cadastro de clientes (código único) | feito |
+| RF08 pesquisa de clientes por código ou nome | feito |
+| RF09 lista de clientes com o que cada um deve | feito |
+| RF11 "Pagou": pagamento total ou parcial da dívida | feito |
+| RN01 limite de dívida | calculado e exibido ("Bloqueado"); a recusa da venda no fiado entra com as vendas |
+| RN03 crédito do cliente | depósito feito; o abatimento nas compras entra com as vendas |
+| RF10 venda no fiado | próxima etapa (junto com as vendas) |
 | RF12 a RF15 expediente e planilhas | próxima etapa |
 
 ## Decisões de implementação
@@ -69,4 +75,12 @@ repositórios conhecem o SQL.
 - O preço aceita `6`, `6,5`, `6,50`, `R$ 6,50` e `1.234,56`. Precisa ser maior
   que zero e no máximo R$ 9.999,99, para barrar erros de digitação.
 - Gravações que mexem em mais de uma tabela usam `with conn:` para ser tudo ou
-  nada (RNF07).
+  nada (RNF07). Os métodos de gravação do `ClienteRepo` não confirmam sozinhos:
+  quem chama abre a transação com `with repo.transacao():`, para que uma venda
+  no fiado (venda + dívida) possa ser gravada numa transação só.
+- Limite de dívida (RN01): é por cliente e opcional (em branco = sem limite). O
+  cliente fica "Bloqueado" quando a dívida passa do limite, e é liberado quando
+  paga até o limite, como no Documento de Software.
+- Pagamento maior que a dívida é recusado; o excedente deve ser lançado em
+  "+ Crédito". Cliente só pode ser removido sem dívida e sem crédito, e o código
+  de um cliente removido não é reutilizado.

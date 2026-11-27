@@ -8,11 +8,14 @@ import customtkinter as ctk
 from src import database
 from src.config import NOME_APP
 from src.repos.categoria_repo import CategoriaRepo
+from src.repos.cliente_repo import ClienteRepo
 from src.repos.produto_repo import ProdutoRepo
 from src.repos.usuario_repo import Usuario, UsuarioRepo
 from src.services.auth_service import AuthService
 from src.services.categoria_service import CategoriaService
+from src.services.cliente_service import ClienteService
 from src.services.produto_service import ProdutoService
+from src.ui.clientes_frame import ClientesFrame
 from src.ui.login_frame import LoginFrame
 from src.ui.menu_frame import MenuFrame
 from src.ui.produtos_frame import ProdutosFrame
@@ -33,6 +36,7 @@ class App(ctk.CTk):
         categoria_repo = CategoriaRepo(self._conn)
         self._categorias = CategoriaService(categoria_repo)
         self._produtos = ProdutoService(ProdutoRepo(self._conn), categoria_repo)
+        self._clientes = ClienteService(ClienteRepo(self._conn))
         self._usuario: Usuario | None = None
         self._tela_atual: ctk.CTkFrame | None = None
 
@@ -56,8 +60,12 @@ class App(ctk.CTk):
                 self, self._usuario,
                 ao_sair=self.mostrar_login,
                 ao_abrir_produtos=self.mostrar_produtos,
+                ao_abrir_clientes=self.mostrar_clientes,
             )
         )
+
+    def mostrar_clientes(self) -> None:
+        self._trocar_tela(ClientesFrame(self, self._clientes, ao_voltar=self.mostrar_menu))
 
     def mostrar_produtos(self) -> None:
         self._trocar_tela(

@@ -46,6 +46,17 @@ def test_parse_reais_recusa_mais_de_duas_casas():
         parse_reais("6,555")
 
 
+def test_mensagens_usam_o_nome_do_campo():
+    with pytest.raises(DadosInvalidosError, match="Informe o limite"):
+        parse_reais("", campo="limite")
+    with pytest.raises(DadosInvalidosError, match="Valor inválido"):
+        parse_reais("abc", campo="valor")
+    with pytest.raises(DadosInvalidosError, match="O valor não pode ser negativo"):
+        parse_reais("-1", campo="valor")
+    with pytest.raises(DadosInvalidosError, match="casas decimais no limite"):
+        parse_reais("1,555", campo="limite")
+
+
 def test_parse_reais_none():
     with pytest.raises(DadosInvalidosError):
         parse_reais(None)

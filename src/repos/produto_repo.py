@@ -4,7 +4,7 @@ from __future__ import annotations
 import sqlite3
 from dataclasses import dataclass
 
-from src.textos import normalizar
+from src.textos import escapar_like, normalizar
 
 
 @dataclass(frozen=True)
@@ -34,10 +34,6 @@ def _para_produto(linha: sqlite3.Row) -> Produto:
         preco_centavos=linha["preco_centavos"],
         ativo=bool(linha["ativo"]),
     )
-
-
-def _escapar_like(termo: str) -> str:
-    return termo.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
 class ProdutoRepo:
@@ -89,7 +85,7 @@ class ProdutoRepo:
 
         termo = normalizar((busca or "").strip())
         if termo:
-            padrao = f"%{_escapar_like(termo)}%"
+            padrao = f"%{escapar_like(termo)}%"
             condicoes.append(
                 "(sem_acento(p.nome) LIKE ? ESCAPE '\\' OR sem_acento(c.nome) LIKE ? ESCAPE '\\')"
             )
