@@ -19,7 +19,7 @@ from pathlib import Path
 from src.config import ARQUIVO_BANCO
 from src.textos import normalizar
 
-VERSAO_SCHEMA = 1
+VERSAO_SCHEMA = 3  # 2: venda ganhou credito_usado_centavos; 3: tabela expediente
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS usuario (
@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS venda (
         CHECK (forma_pagamento IN ('credito', 'debito', 'dinheiro', 'pix', 'fiado')),
     desconto_centavos  INTEGER NOT NULL DEFAULT 0 CHECK (desconto_centavos >= 0),
     total_centavos     INTEGER NOT NULL CHECK (total_centavos >= 0),
+    credito_usado_centavos INTEGER NOT NULL DEFAULT 0 CHECK (credito_usado_centavos >= 0),
     CHECK (forma_pagamento <> 'fiado' OR cliente_codigo IS NOT NULL)
 );
 
@@ -81,15 +82,36 @@ CREATE TABLE IF NOT EXISTS configuracao (
     valor  TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS expediente (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    inicio  TEXT NOT NULL,
+    fim     TEXT,
+    arquivo TEXT
+);
+
 CREATE INDEX IF NOT EXISTS idx_venda_data ON venda (data_hora);
 CREATE INDEX IF NOT EXISTS idx_produto_nome ON produto (nome);
 CREATE INDEX IF NOT EXISTS idx_cliente_nome ON cliente (nome);
 """
 
 
+def _migrar(conn: sqlite3.Connection) -> None:
+    """Atualiza bancos criados por versões anteriores, sem perder dados."""
+    colunas_venda = {linha[1] for linha in conn.execute("PRAGMA table_info(venda)")}
+    if "credito_usado_centavos" not in colunas_venda:
+        conn.execute(
+            "ALTER TABLE venda ADD COLUMN credito_usado_centavos "
+            "INTEGER NOT NULL DEFAULT 0 CHECK (credito_usado_centavos >= 0)"
+        )
+
+
 def inicializar(conn: sqlite3.Connection) -> None:
-    """Cria as tabelas que ainda não existem. Pode ser chamada várias vezes."""
+    """Cria as tabelas que ainda não existem e atualiza as antigas.
+
+    Pode ser chamada várias vezes.
+    """
     conn.executescript(SCHEMA)
+    _migrar(conn)
     conn.execute(f"PRAGMA user_version = {VERSAO_SCHEMA}")
     conn.commit()
 

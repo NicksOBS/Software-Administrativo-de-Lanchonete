@@ -25,11 +25,17 @@ class MenuFrame(ctk.CTkFrame):
         ao_sair: Callable[[], None],
         ao_abrir_produtos: Callable[[], None],
         ao_abrir_clientes: Callable[[], None],
+        ao_abrir_vendas: Callable[[], None],
+        ao_abrir_expediente: Callable[[], None],
     ) -> None:
         super().__init__(master, fg_color="transparent")
         self._usuario = usuario
-        # Opções sem tela ainda mostram o aviso "Em construção".
-        acoes = {"Produtos": ao_abrir_produtos, "Clientes": ao_abrir_clientes}
+        acoes = {
+            "Produtos": ao_abrir_produtos,
+            "Clientes": ao_abrir_clientes,
+            "Vendas": ao_abrir_vendas,
+            "Iniciar/Encerrar\nExpediente": ao_abrir_expediente,
+        }
 
         topo = ctk.CTkFrame(self, fg_color="transparent")
         topo.pack(fill="x", padx=30, pady=(24, 0))

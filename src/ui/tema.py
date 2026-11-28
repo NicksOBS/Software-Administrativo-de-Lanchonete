@@ -11,12 +11,14 @@ COR_SECUNDARIA_HOVER = "#D3DBE7"
 COR_TEXTO = "#1A1A1A"
 COR_TEXTO_SUAVE = "#3D3D3D"
 COR_ERRO = "#B00020"
+COR_SUCESSO = "#1B5E20"
 
 FONTE_TITULO = ("Arial", 30, "bold")
 FONTE_SUBTITULO = ("Arial", 16)
 FONTE_NORMAL = ("Arial", 16)
 FONTE_BOTAO = ("Arial", 18, "bold")
 FONTE_MENU = ("Arial", 24, "bold")
+FONTE_TOTAL = ("Arial", 28, "bold")
 
 ALTURA_BOTAO = 48          # mínimo de 40 px exigido pelo RNF03
 ALTURA_CAMPO = 44

@@ -6,7 +6,7 @@ from src import database
 
 TABELAS = {
     "usuario", "categoria", "produto", "cliente",
-    "venda", "item_venda", "pagamento_divida", "configuracao",
+    "venda", "item_venda", "pagamento_divida", "configuracao", "expediente",
 }
 
 
@@ -85,3 +85,27 @@ def test_banco_em_arquivo_cria_a_pasta(tmp_path):
     c = database.conectar(caminho)
     c.close()
     assert caminho.exists()
+
+
+def test_migra_banco_antigo_sem_credito_usado(tmp_path):
+    """Bancos criados antes do uso de crédito ganham a coluna sem perder vendas."""
+    import sqlite3
+
+    caminho = tmp_path / "antigo.db"
+    antigo = sqlite3.connect(caminho)
+    antigo.executescript(
+        "CREATE TABLE venda (id INTEGER PRIMARY KEY AUTOINCREMENT, data_hora TEXT NOT NULL,"
+        " cliente_codigo INTEGER, forma_pagamento TEXT NOT NULL,"
+        " desconto_centavos INTEGER NOT NULL DEFAULT 0, total_centavos INTEGER NOT NULL);"
+        "INSERT INTO venda (data_hora, forma_pagamento, total_centavos)"
+        " VALUES ('2026-01-01T10:00:00', 'pix', 500);"
+    )
+    antigo.commit()
+    antigo.close()
+
+    conn = database.conectar(caminho)
+    colunas = {l[1] for l in conn.execute("PRAGMA table_info(venda)")}
+    assert "credito_usado_centavos" in colunas
+    assert conn.execute("SELECT credito_usado_centavos, total_centavos FROM venda").fetchone()[:] == (0, 500)
+    assert conn.execute("PRAGMA user_version").fetchone()[0] == database.VERSAO_SCHEMA
+    conn.close()

@@ -8,6 +8,7 @@ from __future__ import annotations
 import re
 from decimal import Decimal
 
+from src.calculadora import calcular_em_reais, eh_expressao
 from src.errors import DadosInvalidosError
 
 _DIGITOS = re.compile(r"[0-9]+")
@@ -20,6 +21,7 @@ def parse_reais(texto: str | None, campo: str = "preço") -> int:
     """Converte o texto digitado em centavos.
 
     Aceita "6", "6,5", "6,50", "6.50", "R$ 6,50" e "1.234,56".
+    Se começar com "=", é uma conta (calculadora): "=(3*4,50)" dá 1350 centavos.
     A vírgula é o separador decimal; o ponto só vale como decimal quando tem
     de 1 a 2 dígitos depois dele ("6.5"). "1.234" é lido como mil duzentos e
     trinta e quatro reais.
@@ -27,6 +29,12 @@ def parse_reais(texto: str | None, campo: str = "preço") -> int:
     `campo` é o nome que aparece nas mensagens de erro ("preço", "valor",
     "limite"...).
     """
+    if eh_expressao(texto):  # RNF04: "=(3*4,50)" vira 13,50
+        resultado = calcular_em_reais(texto)
+        if resultado < 0:
+            raise DadosInvalidosError(f"O {campo} não pode ser negativo.")
+        return int(resultado * 100)
+
     bruto = (texto or "").upper().replace("R$", "").replace(" ", "")
     if not bruto:
         raise DadosInvalidosError(f"Informe o {campo}.")
